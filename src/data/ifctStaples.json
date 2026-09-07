@@ -1,0 +1,412 @@
+[
+  {
+    "id": "atta_whole_wheat",
+    "name": "Atta (Whole Wheat Flour)",
+    "aliases": [
+      "wheat flour",
+      "gehun ka atta"
+    ],
+    "category": "Flatbread Flour",
+    "preparation_type": "griddle-cooked",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": 1.35,
+    "hydration_ratio": 0.65,
+    "macros_per_100g_raw": {
+      "calories": 341,
+      "protein_g": 12.1,
+      "carbs_g": 69.4,
+      "fat_g": 1.7,
+      "fiber_g": 11.2
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables."
+  },
+  {
+    "id": "maida_refined_flour",
+    "name": "Maida (Refined Wheat Flour)",
+    "aliases": [
+      "all-purpose flour",
+      "APF"
+    ],
+    "category": "Flatbread Flour",
+    "preparation_type": "griddle-cooked",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": 1.3,
+    "hydration_ratio": 0.6,
+    "macros_per_100g_raw": {
+      "calories": 348,
+      "protein_g": 11,
+      "carbs_g": 73.9,
+      "fat_g": 0.9,
+      "fiber_g": 2.7
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables."
+  },
+  {
+    "id": "bajra_flour",
+    "name": "Bajra Flour (Pearl Millet)",
+    "aliases": [
+      "pearl millet flour"
+    ],
+    "category": "Flatbread Flour",
+    "preparation_type": "griddle-cooked",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": 1.35,
+    "hydration_ratio": 0.7,
+    "macros_per_100g_raw": {
+      "calories": 361,
+      "protein_g": 11.6,
+      "carbs_g": 67.5,
+      "fat_g": 5,
+      "fiber_g": 11.3
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables."
+  },
+  {
+    "id": "jowar_flour",
+    "name": "Jowar Flour (Sorghum)",
+    "aliases": [
+      "sorghum flour"
+    ],
+    "category": "Flatbread Flour",
+    "preparation_type": "griddle-cooked",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": 1.35,
+    "hydration_ratio": 0.75,
+    "macros_per_100g_raw": {
+      "calories": 349,
+      "protein_g": 10.4,
+      "carbs_g": 72.6,
+      "fat_g": 1.9,
+      "fiber_g": 6.7
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables."
+  },
+  {
+    "id": "besan_gram_flour",
+    "name": "Besan (Gram Flour)",
+    "aliases": [
+      "chickpea flour"
+    ],
+    "category": "Flatbread Flour",
+    "preparation_type": "raw",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": null,
+    "hydration_ratio": null,
+    "macros_per_100g_raw": {
+      "calories": 387,
+      "protein_g": 22,
+      "carbs_g": 57.8,
+      "fat_g": 6.7,
+      "fiber_g": 10.8
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables. No standalone cooked-yield factor - besan is used as a batter/binding ingredient in other dishes (pakora, dhokla, kadhi), not eaten as a fixed cooked-weight staple on its own."
+  },
+  {
+    "id": "basmati_rice_raw",
+    "name": "Basmati Rice (raw)",
+    "aliases": [
+      "basmati"
+    ],
+    "category": "Grain",
+    "preparation_type": "boiled",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": 2.7,
+    "hydration_ratio": 1.75,
+    "macros_per_100g_raw": {
+      "calories": 349,
+      "protein_g": 7.9,
+      "carbs_g": 78.2,
+      "fat_g": 0.5,
+      "fiber_g": 0.9
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables."
+  },
+  {
+    "id": "white_rice_raw",
+    "name": "White Rice, raw (non-basmati)",
+    "aliases": [
+      "rice",
+      "sona masuri"
+    ],
+    "category": "Grain",
+    "preparation_type": "boiled",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": 2.8,
+    "hydration_ratio": 1.75,
+    "macros_per_100g_raw": {
+      "calories": 345,
+      "protein_g": 6.8,
+      "carbs_g": 78.2,
+      "fat_g": 0.5,
+      "fiber_g": 0.2
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables."
+  },
+  {
+    "id": "suji_rava",
+    "name": "Suji / Rava (Semolina)",
+    "aliases": [
+      "rava",
+      "sooji"
+    ],
+    "category": "Grain",
+    "preparation_type": "boiled",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": 3,
+    "hydration_ratio": 2.25,
+    "macros_per_100g_raw": {
+      "calories": 348,
+      "protein_g": 10.4,
+      "carbs_g": 74.8,
+      "fat_g": 1,
+      "fiber_g": 2.8
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables. Yield factor assumes standard upma-style preparation; varies with desired consistency."
+  },
+  {
+    "id": "poha_flattened_rice",
+    "name": "Poha (Flattened Rice, dry)",
+    "aliases": [
+      "chivda poha",
+      "aval"
+    ],
+    "category": "Grain",
+    "preparation_type": "boiled",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": 1.8,
+    "hydration_ratio": 0.8,
+    "macros_per_100g_raw": {
+      "calories": 356,
+      "protein_g": 6.6,
+      "carbs_g": 77.3,
+      "fat_g": 1.2,
+      "fiber_g": 1
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables. Poha is rinsed/soaked briefly rather than boiled - yield factor reflects water taken up during rinsing plus light cooking."
+  },
+  {
+    "id": "toor_dal_raw",
+    "name": "Toor Dal (raw, split pigeon pea)",
+    "aliases": [
+      "arhar dal",
+      "split pigeon pea"
+    ],
+    "category": "Dal",
+    "preparation_type": "pressure-cooked",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": 2.5,
+    "hydration_ratio": 2.5,
+    "macros_per_100g_raw": {
+      "calories": 335,
+      "protein_g": 22.3,
+      "carbs_g": 57.6,
+      "fat_g": 1.7,
+      "fiber_g": 15
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables."
+  },
+  {
+    "id": "chana_dal_raw",
+    "name": "Chana Dal (raw, split Bengal gram)",
+    "aliases": [
+      "split chickpea dal"
+    ],
+    "category": "Dal",
+    "preparation_type": "pressure-cooked",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": 2.3,
+    "hydration_ratio": 2.5,
+    "macros_per_100g_raw": {
+      "calories": 372,
+      "protein_g": 20.8,
+      "carbs_g": 61.5,
+      "fat_g": 5.3,
+      "fiber_g": 12.6
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables."
+  },
+  {
+    "id": "moong_dal_raw",
+    "name": "Moong Dal (raw, split green gram)",
+    "aliases": [
+      "mung dal",
+      "yellow moong dal"
+    ],
+    "category": "Dal",
+    "preparation_type": "pressure-cooked",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": 2.7,
+    "hydration_ratio": 2.7,
+    "macros_per_100g_raw": {
+      "calories": 344,
+      "protein_g": 24.5,
+      "carbs_g": 59.9,
+      "fat_g": 1.2,
+      "fiber_g": 16.3
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables."
+  },
+  {
+    "id": "masoor_dal_raw",
+    "name": "Masoor Dal (raw, split red lentil)",
+    "aliases": [
+      "red lentils",
+      "masoor"
+    ],
+    "category": "Dal",
+    "preparation_type": "pressure-cooked",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": 2.7,
+    "hydration_ratio": 2.5,
+    "macros_per_100g_raw": {
+      "calories": 343,
+      "protein_g": 25,
+      "carbs_g": 59,
+      "fat_g": 1.1,
+      "fiber_g": 11.5
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables."
+  },
+  {
+    "id": "urad_dal_raw",
+    "name": "Urad Dal (raw, split black gram)",
+    "aliases": [
+      "split black gram"
+    ],
+    "category": "Dal",
+    "preparation_type": "pressure-cooked",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": 2.5,
+    "hydration_ratio": 2.5,
+    "macros_per_100g_raw": {
+      "calories": 341,
+      "protein_g": 25,
+      "carbs_g": 58.9,
+      "fat_g": 1.4,
+      "fiber_g": 18
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables."
+  },
+  {
+    "id": "rajma_raw",
+    "name": "Rajma (raw, whole kidney beans)",
+    "aliases": [
+      "kidney beans"
+    ],
+    "category": "Legume",
+    "preparation_type": "pressure-cooked",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": 2.8,
+    "hydration_ratio": 3,
+    "macros_per_100g_raw": {
+      "calories": 333,
+      "protein_g": 22.9,
+      "carbs_g": 60.6,
+      "fat_g": 1.3,
+      "fiber_g": 15.2
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables. Yield factor accounts for overnight soak plus pressure-cooking."
+  },
+  {
+    "id": "kabuli_chana_raw",
+    "name": "Kabuli Chana (raw, whole chickpeas)",
+    "aliases": [
+      "chickpeas",
+      "garbanzo beans",
+      "white chana"
+    ],
+    "category": "Legume",
+    "preparation_type": "pressure-cooked",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": 2.5,
+    "hydration_ratio": 3,
+    "macros_per_100g_raw": {
+      "calories": 364,
+      "protein_g": 20.5,
+      "carbs_g": 61,
+      "fat_g": 5.6,
+      "fiber_g": 17.4
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables. Yield factor accounts for overnight soak plus pressure-cooking."
+  },
+  {
+    "id": "paneer_fresh",
+    "name": "Paneer",
+    "aliases": [
+      "cottage cheese (indian)"
+    ],
+    "category": "Dairy",
+    "preparation_type": "raw",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": null,
+    "hydration_ratio": null,
+    "macros_per_100g_raw": {
+      "calories": 265,
+      "protein_g": 18.3,
+      "carbs_g": 6.1,
+      "fat_g": 20.8,
+      "fiber_g": 0
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables. Paneer is already a finished pressed-curd product - no further raw/cooked yield conversion applies within this schema."
+  },
+  {
+    "id": "mustard_oil",
+    "name": "Mustard Oil",
+    "aliases": [
+      "sarson ka tel"
+    ],
+    "category": "Fat/Oil",
+    "preparation_type": "raw",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": null,
+    "hydration_ratio": null,
+    "macros_per_100g_raw": {
+      "calories": 884,
+      "protein_g": 0,
+      "carbs_g": 0,
+      "fat_g": 100,
+      "fiber_g": 0
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables. Oils have no cooking-yield transformation - weight consumed equals weight measured."
+  },
+  {
+    "id": "ghee",
+    "name": "Ghee",
+    "aliases": [
+      "clarified butter"
+    ],
+    "category": "Fat/Oil",
+    "preparation_type": "raw",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": null,
+    "hydration_ratio": null,
+    "macros_per_100g_raw": {
+      "calories": 900,
+      "protein_g": 0,
+      "carbs_g": 0,
+      "fat_g": 100,
+      "fiber_g": 0
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables."
+  },
+  {
+    "id": "groundnut_oil",
+    "name": "Groundnut Oil",
+    "aliases": [
+      "peanut oil"
+    ],
+    "category": "Fat/Oil",
+    "preparation_type": "raw",
+    "raw_weight_g": 100,
+    "cooked_yield_factor": null,
+    "hydration_ratio": null,
+    "macros_per_100g_raw": {
+      "calories": 884,
+      "protein_g": 0,
+      "carbs_g": 0,
+      "fat_g": 100,
+      "fiber_g": 0
+    },
+    "source_note": "Reference-quality estimate based on commonly-cited Indian nutrition figures; not independently verified against the published IFCT 2017 tables."
+  }
+]

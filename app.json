@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "AI Food Tracker",
+    "slug": "ai-food-tracker",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0F172A"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourcompany.aifoodtracker",
+      "infoPlist": {
+        "NSCameraUsageDescription": "AI Food Tracker needs camera access so it can analyze photos of your meals."
+      }
+    },
+    "android": {
+      "package": "com.yourcompany.aifoodtracker",
+      "permissions": [
+        "CAMERA",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "AI Food Tracker needs camera access so it can analyze photos of your meals."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "3715d3df-d05c-4a0c-9ee8-7692c26dd892"
+      }
+    },
+    "owner": "akshatwexpo"
+  }
+}
