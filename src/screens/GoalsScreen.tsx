@@ -5,7 +5,6 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -14,6 +13,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList, GoalSet } from "@/types";
 import { useGoalsStore } from "@/store/goalsStore";
 import { colors } from "@/theme/colors";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Goals">;
 
@@ -84,56 +84,58 @@ export default function GoalsScreen({ navigation }: Props) {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{ flex: 1 }}
-      >
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.cancelText}>Cancel</Text>
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Goals</Text>
-          <TouchableOpacity onPress={handleSave}>
-            <Text style={styles.saveText}>Save</Text>
-          </TouchableOpacity>
-        </View>
-
-        <ScrollView style={{ paddingHorizontal: 20 }} showsVerticalScrollIndicator={false}>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Daily Goals</Text>
-            <GoalFields values={daily} onChange={setDaily} />
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safe}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={{ flex: 1 }}
+        >
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Goals</Text>
+            <TouchableOpacity onPress={handleSave}>
+              <Text style={styles.saveText}>Save</Text>
+            </TouchableOpacity>
           </View>
 
-          <View style={styles.card}>
-            <View style={styles.cardHeaderRow}>
-              <Text style={styles.cardTitle}>Weekly Goals</Text>
-              <TouchableOpacity onPress={applyDailyTimesSeven}>
-                <Text style={styles.linkText}>Use daily × 7</Text>
-              </TouchableOpacity>
+          <ScrollView style={{ paddingHorizontal: 20 }} showsVerticalScrollIndicator={false}>
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>Daily Goals</Text>
+              <GoalFields values={daily} onChange={setDaily} />
             </View>
-            <GoalFields values={weekly} onChange={setWeekly} />
-          </View>
 
-          <View style={[styles.card, { marginBottom: 32 }]}>
-            <Text style={styles.cardTitle}>Body weight</Text>
-            <Text style={styles.weightHint}>
-              Used only to estimate water intake and exercise minutes - never
-              shared, stored only on this device.
-            </Text>
-            <View style={[styles.fieldInputWrap, { width: 128 }]}>
-              <TextInput
-                value={weight}
-                onChangeText={setWeight}
-                keyboardType="number-pad"
-                style={styles.fieldInput}
-              />
-              <Text style={styles.fieldUnit}>kg</Text>
+            <View style={styles.card}>
+              <View style={styles.cardHeaderRow}>
+                <Text style={styles.cardTitle}>Weekly Goals</Text>
+                <TouchableOpacity onPress={applyDailyTimesSeven}>
+                  <Text style={styles.linkText}>Use daily × 7</Text>
+                </TouchableOpacity>
+              </View>
+              <GoalFields values={weekly} onChange={setWeekly} />
             </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+
+            <View style={[styles.card, { marginBottom: 32 }]}>
+              <Text style={styles.cardTitle}>Body weight</Text>
+              <Text style={styles.weightHint}>
+                Used only to estimate water intake and exercise minutes - never
+                shared, stored only on this device.
+              </Text>
+              <View style={[styles.fieldInputWrap, { width: 128 }]}>
+                <TextInput
+                  value={weight}
+                  onChangeText={setWeight}
+                  keyboardType="number-pad"
+                  style={styles.fieldInput}
+                />
+                <Text style={styles.fieldUnit}>kg</Text>
+              </View>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

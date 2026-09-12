@@ -100,16 +100,22 @@ export const OIL_OPTIONS: OilOption[] = [
  */
 export function buildOilItem(option: OilOption): FoodItem | null {
   if (option.id === "none") return null;
+  const w = Math.round(option.extraFat_g);
   return {
     food_name: `Oil / fat adjustment (${option.label})`,
-    estimated_weight_g: Math.round(option.extraFat_g * (100 / 100)), // fat is ~100% of oil weight
+    estimated_weight_g: w,
+    estimated_weight_min_g: w,
+    estimated_weight_max_g: w,
+    best_guess_weight_g: w,
+    weight_confidence_level: "high",
+    confidence_explanation: "User-selected cooking method",
     macros: {
       calories: option.extraCalories,
       protein_g: 0,
       carbs_g: 0,
       fat_g: option.extraFat_g,
     },
-    confidence_score: 100, // user-selected, not estimated
+    confidence_score: 100,
   };
 }
 

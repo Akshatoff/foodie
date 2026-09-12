@@ -154,6 +154,62 @@ export function groupByDateKey(meals: LoggedMeal[]): Record<string, LoggedMeal[]
   return out;
 }
 
+// ---- Rolling averages ---------------------------------------------------
+
+/**
+ * Average macros per day over a trailing window ending on `endDate`
+ * (inclusive), counting EVERY calendar day in the window - including days
+ * with zero logged meals - rather than only averaging days you actually
+ * logged something on. This is deliberate: silently excluding missed days
+ * would hide exactly the pattern someone trying to hit a daily surplus (or
+ * deficit) most needs to see. A day you forgot to log, or genuinely ate
+ * nothing significant on, should pull the average down, not vanish from it.
+ */
+export function rollingAverage(
+  meals: LoggedMeal[],
+  endDate: Date,
+  windowDays: number
+): Macros {
+  const start = new Date(endDate);
+  start.setDate(start.getDate() - (windowDays - 1));
+  const total = sumMacros(mealsInRange(meals, start, endDate));
+  return {
+    calories: Math.round(total.calories / windowDays),
+    protein_g: Math.round((total.protein_g / windowDays) * 10) / 10,
+    carbs_g: Math.round((total.carbs_g / windowDays) * 10) / 10,
+    fat_g: Math.round((total.fat_g / windowDays) * 10) / 10,
+  };
+}
+
+export interface RollingAveragePoint {
+  date: Date;
+  average: Macros;
+}
+
+/**
+ * A trend series of rolling averages, one point per day, for the
+ * `numPoints` days ending on `endDate`. Each point is itself a
+ * `windowDays`-day trailing average ending on that day - e.g. with
+ * windowDays=7 and numPoints=14, you get 14 points, each showing "the
+ * 7-day average as it stood on that day," which is what actually reveals
+ * whether your rolling average has been climbing, flat, or declining
+ * rather than just what it is right now.
+ */
+export function rollingAverageSeries(
+  meals: LoggedMeal[],
+  endDate: Date,
+  numPoints: number,
+  windowDays: number
+): RollingAveragePoint[] {
+  const points: RollingAveragePoint[] = [];
+  for (let i = numPoints - 1; i >= 0; i--) {
+    const pointDate = new Date(endDate);
+    pointDate.setDate(pointDate.getDate() - i);
+    points.push({ date: pointDate, average: rollingAverage(meals, pointDate, windowDays) });
+  }
+  return points;
+}
+
 // ---- Goal evaluation ---------------------------------------------------------
 
 /**

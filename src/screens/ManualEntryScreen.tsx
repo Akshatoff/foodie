@@ -6,7 +6,6 @@ import {
   FlatList,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -19,6 +18,7 @@ import HouseholdPortionSelector from "@/components/HouseholdPortionSelector";
 import { buildQuickHouseholdItems, QuickHouseholdItem } from "@/utils/quickHouseholdItems";
 import { PortionResult } from "@/utils/householdUnits";
 import { colors } from "@/theme/colors";
+import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ManualEntry">;
 
@@ -162,155 +162,157 @@ export default function ManualEntryScreen({ navigation, route }: Props) {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{ flex: 1 }}
-      >
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.cancelText}>Cancel</Text>
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Log Manually</Text>
-          <View style={{ width: 50 }} />
-        </View>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safe}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={{ flex: 1 }}
+        >
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Log Manually</Text>
+            <View style={{ width: 50 }} />
+          </View>
 
-        <View style={{ paddingHorizontal: 20 }}>
-          <TextInput
-            value={query}
-            onChangeText={setQuery}
-            placeholder="Search foods (e.g. chicken, rice, banana)"
-            placeholderTextColor={colors.slate500}
-            style={styles.searchInput}
-          />
-        </View>
+          <View style={{ paddingHorizontal: 20 }}>
+            <TextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Search foods (e.g. chicken, rice, banana)"
+              placeholderTextColor={colors.slate500}
+              style={styles.searchInput}
+            />
+          </View>
 
-        {/* Household unit quick-add: Katori/Roti/Spoon instead of grams */}
-        {quickItems.length > 0 && (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.quickChipRow}
-          >
-            {quickItems.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                style={styles.quickChip}
-                onPress={() => setActiveQuickItem(item)}
-                activeOpacity={0.75}
-              >
-                <Text style={styles.quickChipEmoji}>{item.emoji}</Text>
-                <Text style={styles.quickChipLabel}>{item.label}</Text>
+          {/* Household unit quick-add: Katori/Roti/Spoon instead of grams */}
+          {quickItems.length > 0 && (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.quickChipRow}
+            >
+              {quickItems.map((item) => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={styles.quickChip}
+                  onPress={() => setActiveQuickItem(item)}
+                  activeOpacity={0.75}
+                >
+                  <Text style={styles.quickChipEmoji}>{item.emoji}</Text>
+                  <Text style={styles.quickChipLabel}>{item.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
+
+          {/* Search results */}
+          <FlatList
+            data={filtered}
+            keyExtractor={(item) => item.id}
+            style={styles.searchList}
+            keyboardShouldPersistTaps="handled"
+            renderItem={({ item }) => (
+              <TouchableOpacity onPress={() => addFood(item)} style={styles.searchRow}>
+                <Text style={styles.searchRowName}>{item.name}</Text>
+                <Text style={styles.searchRowCalories}>
+                  {item.unit
+                    ? `${Math.round((item.per100g.calories * item.unit.gramsPerUnit) / 100)} kcal/${item.unit.label}`
+                    : `${item.per100g.calories} kcal/100g`}
+                </Text>
               </TouchableOpacity>
-            ))}
-          </ScrollView>
-        )}
+            )}
+            ListEmptyComponent={<Text style={styles.noMatches}>No matches. Try another term.</Text>}
+          />
 
-        {/* Search results */}
-        <FlatList
-          data={filtered}
-          keyExtractor={(item) => item.id}
-          style={styles.searchList}
-          keyboardShouldPersistTaps="handled"
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => addFood(item)} style={styles.searchRow}>
-              <Text style={styles.searchRowName}>{item.name}</Text>
-              <Text style={styles.searchRowCalories}>
-                {item.unit
-                  ? `${Math.round((item.per100g.calories * item.unit.gramsPerUnit) / 100)} kcal/${item.unit.label}`
-                  : `${item.per100g.calories} kcal/100g`}
+          {/* Selected items */}
+          <View style={styles.selectedWrap}>
+            <Text style={styles.sectionTitle}>Meal Items ({selected.length})</Text>
+            {selected.length === 0 ? (
+              <Text style={styles.emptyHint}>
+                Search above and tap a food to add it to this meal. Tap it
+                again (or use +/−) to bump up countable foods like roti or eggs.
+              </Text>
+            ) : (
+              <FlatList
+                data={selected}
+                keyExtractor={(item) => item.food.id}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 16 }}
+                renderItem={({ item }) => {
+                  const macros = scaledMacros(item.food, item.weightG);
+                  return (
+                    <View style={styles.selectedCard}>
+                      <View style={styles.selectedHeaderRow}>
+                        <Text style={styles.selectedName}>{item.food.name}</Text>
+                        <TouchableOpacity
+                          onPress={() => removeItem(item.food.id)}
+                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        >
+                          <Text style={styles.removeX}>×</Text>
+                        </TouchableOpacity>
+                      </View>
+                      <View style={styles.selectedFooterRow}>
+                        {item.food.unit ? (
+                          <QuantityStepper
+                            value={item.quantity}
+                            onChange={(next) => updateQuantity(item.food.id, next)}
+                            unitLabel={item.food.unit.label}
+                          />
+                        ) : (
+                          <View style={styles.weightInputWrap}>
+                            <TextInput
+                              value={String(item.weightG)}
+                              onChangeText={(t) => updateWeight(item.food.id, parseInt(t, 10) || 0)}
+                              keyboardType="number-pad"
+                              style={styles.weightInput}
+                            />
+                            <Text style={styles.gramsLabel}>grams</Text>
+                          </View>
+                        )}
+                        <Text style={styles.itemCalories}>{macros.calories} kcal</Text>
+                      </View>
+                    </View>
+                  );
+                }}
+              />
+            )}
+          </View>
+
+          <View style={styles.footer}>
+            <TouchableOpacity
+              onPress={handleContinue}
+              disabled={selected.length === 0}
+              style={[styles.continueButton, selected.length === 0 && styles.continueButtonDisabled]}
+            >
+              <Text
+                style={[
+                  styles.continueButtonText,
+                  selected.length === 0 && styles.continueButtonTextDisabled,
+                ]}
+              >
+                Continue
               </Text>
             </TouchableOpacity>
-          )}
-          ListEmptyComponent={<Text style={styles.noMatches}>No matches. Try another term.</Text>}
-        />
+          </View>
+        </KeyboardAvoidingView>
 
-        {/* Selected items */}
-        <View style={styles.selectedWrap}>
-          <Text style={styles.sectionTitle}>Meal Items ({selected.length})</Text>
-          {selected.length === 0 ? (
-            <Text style={styles.emptyHint}>
-              Search above and tap a food to add it to this meal. Tap it
-              again (or use +/−) to bump up countable foods like roti or eggs.
-            </Text>
-          ) : (
-            <FlatList
-              data={selected}
-              keyExtractor={(item) => item.food.id}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingBottom: 16 }}
-              renderItem={({ item }) => {
-                const macros = scaledMacros(item.food, item.weightG);
-                return (
-                  <View style={styles.selectedCard}>
-                    <View style={styles.selectedHeaderRow}>
-                      <Text style={styles.selectedName}>{item.food.name}</Text>
-                      <TouchableOpacity
-                        onPress={() => removeItem(item.food.id)}
-                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                      >
-                        <Text style={styles.removeX}>×</Text>
-                      </TouchableOpacity>
-                    </View>
-                    <View style={styles.selectedFooterRow}>
-                      {item.food.unit ? (
-                        <QuantityStepper
-                          value={item.quantity}
-                          onChange={(next) => updateQuantity(item.food.id, next)}
-                          unitLabel={item.food.unit.label}
-                        />
-                      ) : (
-                        <View style={styles.weightInputWrap}>
-                          <TextInput
-                            value={String(item.weightG)}
-                            onChangeText={(t) => updateWeight(item.food.id, parseInt(t, 10) || 0)}
-                            keyboardType="number-pad"
-                            style={styles.weightInput}
-                          />
-                          <Text style={styles.gramsLabel}>grams</Text>
-                        </View>
-                      )}
-                      <Text style={styles.itemCalories}>{macros.calories} kcal</Text>
-                    </View>
-                  </View>
-                );
-              }}
-            />
-          )}
-        </View>
-
-        <View style={styles.footer}>
-          <TouchableOpacity
-            onPress={handleContinue}
-            disabled={selected.length === 0}
-            style={[styles.continueButton, selected.length === 0 && styles.continueButtonDisabled]}
-          >
-            <Text
-              style={[
-                styles.continueButtonText,
-                selected.length === 0 && styles.continueButtonTextDisabled,
-              ]}
-            >
-              Continue
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
-
-      {activeQuickItem && (
-        <HouseholdPortionSelector
-          visible={!!activeQuickItem}
-          onDismiss={() => setActiveQuickItem(null)}
-          onConfirm={handleHouseholdConfirm}
-          foodName={activeQuickItem.label}
-          availableModes={activeQuickItem.modes}
-          foodMacrosPer100g={activeQuickItem.foodMacrosPer100g}
-          densityCategory={activeQuickItem.densityCategory}
-          flourMacrosPer100g={activeQuickItem.flourMacrosPer100g}
-          fatMacrosPer100g={activeQuickItem.fatMacrosPer100g}
-        />
-      )}
-    </SafeAreaView>
+        {activeQuickItem && (
+          <HouseholdPortionSelector
+            visible={!!activeQuickItem}
+            onDismiss={() => setActiveQuickItem(null)}
+            onConfirm={handleHouseholdConfirm}
+            foodName={activeQuickItem.label}
+            availableModes={activeQuickItem.modes}
+            foodMacrosPer100g={activeQuickItem.foodMacrosPer100g}
+            densityCategory={activeQuickItem.densityCategory}
+            flourMacrosPer100g={activeQuickItem.flourMacrosPer100g}
+            fatMacrosPer100g={activeQuickItem.fatMacrosPer100g}
+          />
+        )}
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

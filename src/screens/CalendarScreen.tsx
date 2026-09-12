@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/types";
 import { useMealStore } from "@/store/mealStore";
@@ -13,6 +13,7 @@ import {
   dateKey,
 } from "@/utils/nutrition";
 import { colors } from "@/theme/colors";
+import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Calendar">;
 
@@ -65,91 +66,93 @@ export default function CalendarScreen({ navigation }: Props) {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>Back</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Calendar</Text>
-        <View style={{ width: 40 }} />
-      </View>
-
-      <View style={styles.streakCard}>
-        <Text style={styles.streakEmoji}>🔥</Text>
-        <View>
-          <Text style={styles.streakValue}>
-            {streak} day{streak === 1 ? "" : "s"}
-          </Text>
-          <Text style={styles.streakLabel}>current streak</Text>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Text style={styles.backText}>Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Calendar</Text>
+          <View style={{ width: 40 }} />
         </View>
-      </View>
 
-      <View style={styles.weekNavRow}>
-        <TouchableOpacity onPress={() => changeWeek(-1)} style={styles.weekNavButton}>
-          <Text style={styles.weekNavArrow}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.weekLabel}>{rangeLabel}</Text>
-        <TouchableOpacity onPress={() => changeWeek(1)} style={styles.weekNavButton}>
-          <Text style={styles.weekNavArrow}>›</Text>
-        </TouchableOpacity>
-      </View>
+        <View style={styles.streakCard}>
+          <Text style={styles.streakEmoji}>🔥</Text>
+          <View>
+            <Text style={styles.streakValue}>
+              {streak} day{streak === 1 ? "" : "s"}
+            </Text>
+            <Text style={styles.streakLabel}>current streak</Text>
+          </View>
+        </View>
 
-      <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
-        {week.map((day, idx) => {
-          const key = dateKey(day);
-          const dayMeals = grouped[key];
-          const hasMeals = !!dayMeals && dayMeals.length > 0;
-          const totals = hasMeals ? sumMacros(dayMeals) : null;
-          const met = totals ? isGoalMet(totals, dailyGoal) : false;
-          const isToday = key === dateKey(today);
-          const isFuture = day > today;
+        <View style={styles.weekNavRow}>
+          <TouchableOpacity onPress={() => changeWeek(-1)} style={styles.weekNavButton}>
+            <Text style={styles.weekNavArrow}>‹</Text>
+          </TouchableOpacity>
+          <Text style={styles.weekLabel}>{rangeLabel}</Text>
+          <TouchableOpacity onPress={() => changeWeek(1)} style={styles.weekNavButton}>
+            <Text style={styles.weekNavArrow}>›</Text>
+          </TouchableOpacity>
+        </View>
 
-          return (
-            <View
-              key={key}
-              style={[styles.dayRow, isToday && styles.dayRowToday]}
-            >
-              <View style={styles.dayLeft}>
-                <Text style={styles.weekdayText}>{WEEKDAY_FULL[idx]}</Text>
-                <Text style={[styles.dateText, isFuture && styles.dateTextFuture]}>
-                  {day.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-                </Text>
-                {isToday && <Text style={styles.todayTag}>Today</Text>}
+        <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
+          {week.map((day, idx) => {
+            const key = dateKey(day);
+            const dayMeals = grouped[key];
+            const hasMeals = !!dayMeals && dayMeals.length > 0;
+            const totals = hasMeals ? sumMacros(dayMeals) : null;
+            const met = totals ? isGoalMet(totals, dailyGoal) : false;
+            const isToday = key === dateKey(today);
+            const isFuture = day > today;
+
+            return (
+              <View
+                key={key}
+                style={[styles.dayRow, isToday && styles.dayRowToday]}
+              >
+                <View style={styles.dayLeft}>
+                  <Text style={styles.weekdayText}>{WEEKDAY_FULL[idx]}</Text>
+                  <Text style={[styles.dateText, isFuture && styles.dateTextFuture]}>
+                    {day.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                  </Text>
+                  {isToday && <Text style={styles.todayTag}>Today</Text>}
+                </View>
+
+                <View style={styles.dayRight}>
+                  {isFuture ? (
+                    <Text style={styles.futureText}>—</Text>
+                  ) : hasMeals ? (
+                    <>
+                      <Text style={styles.caloriesText}>{totals!.calories} kcal</Text>
+                      <View
+                        style={[
+                          styles.statusDot,
+                          met ? styles.statusDotMet : styles.statusDotMissed,
+                        ]}
+                      />
+                    </>
+                  ) : (
+                    <Text style={styles.noDataText}>No meals logged</Text>
+                  )}
+                </View>
               </View>
+            );
+          })}
+        </ScrollView>
 
-              <View style={styles.dayRight}>
-                {isFuture ? (
-                  <Text style={styles.futureText}>—</Text>
-                ) : hasMeals ? (
-                  <>
-                    <Text style={styles.caloriesText}>{totals!.calories} kcal</Text>
-                    <View
-                      style={[
-                        styles.statusDot,
-                        met ? styles.statusDotMet : styles.statusDotMissed,
-                      ]}
-                    />
-                  </>
-                ) : (
-                  <Text style={styles.noDataText}>No meals logged</Text>
-                )}
-              </View>
-            </View>
-          );
-        })}
-      </ScrollView>
-
-      <View style={styles.legendRow}>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: colors.primary }]} />
-          <Text style={styles.legendText}>Goal met</Text>
+        <View style={styles.legendRow}>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: colors.primary }]} />
+            <Text style={styles.legendText}>Goal met</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: colors.dangerMuted }]} />
+            <Text style={styles.legendText}>Logged, goal missed</Text>
+          </View>
         </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: colors.dangerMuted }]} />
-          <Text style={styles.legendText}>Logged, goal missed</Text>
-        </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

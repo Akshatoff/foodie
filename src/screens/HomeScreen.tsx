@@ -4,11 +4,11 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  SafeAreaView,
   StatusBar,
   ScrollView,
   StyleSheet,
 } from "react-native";
+import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList, LoggedMeal } from "@/types";
 import { useMealStore } from "@/store/mealStore";
@@ -63,139 +63,141 @@ export default function HomeScreen({ navigation }: Props) {
   const excessCalories = Math.max(0, totals.calories - dailyGoal.calories);
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" />
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safe}>
+        <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.dateText}>{today}</Text>
-          <Text style={styles.headerTitle}>Today's Nutrition</Text>
-        </View>
-        <View style={styles.headerIcons}>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Goals")}
-            accessibilityLabel="Goals"
-            style={styles.iconButton}
-          >
-            <Text style={styles.iconText}>🎯</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Progress")}
-            accessibilityLabel="Progress"
-            style={styles.iconButton}
-          >
-            <Text style={styles.iconText}>📊</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Calendar")}
-            accessibilityLabel="Calendar"
-            style={styles.iconButton}
-          >
-            <Text style={styles.iconText}>📅</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("CorrectionSettings")}
-            accessibilityLabel="Correction Settings"
-            style={styles.iconButton}
-          >
-            <Text style={styles.iconText}>⚙️</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {pendingCount > 0 && (
-          <TouchableOpacity
-            onPress={() => navigation.navigate("PendingQueue")}
-            style={styles.pendingBanner}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.pendingBannerEmoji}>⏳</Text>
-            <Text style={styles.pendingBannerText}>
-              {pendingCount} meal{pendingCount === 1 ? "" : "s"} waiting to sync
-            </Text>
-            <Text style={styles.pendingBannerArrow}>›</Text>
-          </TouchableOpacity>
-        )}
-
-        {/* Daily summary card */}
-        <View style={styles.summaryCard}>
-          <MacroStat label="Calories" value={totals.calories} unit="" color={colors.primary} />
-          <MacroStat label="Protein" value={totals.protein_g} unit="g" color={colors.blue} />
-          <MacroStat label="Carbs" value={totals.carbs_g} unit="g" color={colors.yellow} />
-          <MacroStat label="Fat" value={totals.fat_g} unit="g" color={colors.orange} />
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.dateText}>{today}</Text>
+            <Text style={styles.headerTitle}>Today's Nutrition</Text>
+          </View>
+          <View style={styles.headerIcons}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Goals")}
+              accessibilityLabel="Goals"
+              style={styles.iconButton}
+            >
+              <Text style={styles.iconText}>🎯</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Progress")}
+              accessibilityLabel="Progress"
+              style={styles.iconButton}
+            >
+              <Text style={styles.iconText}>📊</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Calendar")}
+              accessibilityLabel="Calendar"
+              style={styles.iconButton}
+            >
+              <Text style={styles.iconText}>📅</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("CorrectionSettings")}
+              accessibilityLabel="Correction Settings"
+              style={styles.iconButton}
+            >
+              <Text style={styles.iconText}>⚙️</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Water */}
-        <View style={styles.sectionMargin}>
-          <WaterIntakeCard weightKg={weightKg} caloriesConsumedToday={totals.calories} />
-        </View>
-
-        {/* Movement suggestions if over goal */}
-        <View style={styles.horizontalMargin}>
-          <ExerciseSuggestions excessCalories={excessCalories} weightKg={weightKg} />
-        </View>
-
-        {/* Tag filter */}
-        <View style={styles.tagFilterWrap}>
-          <TagFilterBar selectedTag={selectedTag} onSelect={setSelectedTag} />
-        </View>
-
-        {/* Meal list */}
-        <View style={styles.mealListWrap}>
-          <Text style={styles.sectionTitle}>
-            {selectedTag ? `${selectedTag} (${filteredMeals.length})` : "Logged Meals"}
-          </Text>
-          {filteredMeals.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateText}>
-                {selectedTag
-                  ? `No meals tagged "${selectedTag}" yet today.`
-                  : "No meals logged yet today. Tap the + button to snap your first meal."}
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {pendingCount > 0 && (
+            <TouchableOpacity
+              onPress={() => navigation.navigate("PendingQueue")}
+              style={styles.pendingBanner}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.pendingBannerEmoji}>⏳</Text>
+              <Text style={styles.pendingBannerText}>
+                {pendingCount} meal{pendingCount === 1 ? "" : "s"} waiting to sync
               </Text>
-            </View>
-          ) : (
-            <FlatList<LoggedMeal>
-              data={filteredMeals}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <MealListItem meal={item} onDelete={removeMeal} onPress={handleEditMeal} />
-              )}
-              scrollEnabled={false}
-              contentContainerStyle={{ paddingBottom: 120 }}
-            />
+              <Text style={styles.pendingBannerArrow}>›</Text>
+            </TouchableOpacity>
           )}
-        </View>
-      </ScrollView>
 
-      {/* Secondary action: manual entry, no camera/AI required */}
-      <TouchableOpacity
-        onPress={() => navigation.navigate("ManualEntry", {})}
-        activeOpacity={0.85}
-        accessibilityLabel="Log meal manually"
-        style={styles.manualEntryButton}
-      >
-        <Text style={styles.manualEntryIcon}>✎</Text>
-      </TouchableOpacity>
+          {/* Daily summary card */}
+          <View style={styles.summaryCard}>
+            <MacroStat label="Calories" value={totals.calories} unit="" color={colors.primary} />
+            <MacroStat label="Protein" value={totals.protein_g} unit="g" color={colors.blue} />
+            <MacroStat label="Carbs" value={totals.carbs_g} unit="g" color={colors.yellow} />
+            <MacroStat label="Fat" value={totals.fat_g} unit="g" color={colors.orange} />
+          </View>
 
-      {/* Floating action button */}
-      <TouchableOpacity
-        onPress={() => navigation.navigate("Camera")}
-        activeOpacity={0.85}
-        accessibilityLabel="Log meal"
-        style={styles.fab}
-      >
-        <Text style={styles.fabPlus}>+</Text>
-      </TouchableOpacity>
+          {/* Water */}
+          <View style={styles.sectionMargin}>
+            <WaterIntakeCard weightKg={weightKg} caloriesConsumedToday={totals.calories} />
+          </View>
 
-      {lastDeleted && (
-        <UndoSnackbar
-          deletedMeal={lastDeleted}
-          onUndo={undoDelete}
-          onDismiss={dismissUndo}
-        />
-      )}
-    </SafeAreaView>
+          {/* Movement suggestions if over goal */}
+          <View style={styles.horizontalMargin}>
+            <ExerciseSuggestions excessCalories={excessCalories} weightKg={weightKg} />
+          </View>
+
+          {/* Tag filter */}
+          <View style={styles.tagFilterWrap}>
+            <TagFilterBar selectedTag={selectedTag} onSelect={setSelectedTag} />
+          </View>
+
+          {/* Meal list */}
+          <View style={styles.mealListWrap}>
+            <Text style={styles.sectionTitle}>
+              {selectedTag ? `${selectedTag} (${filteredMeals.length})` : "Logged Meals"}
+            </Text>
+            {filteredMeals.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateText}>
+                  {selectedTag
+                    ? `No meals tagged "${selectedTag}" yet today.`
+                    : "No meals logged yet today. Tap the + button to snap your first meal."}
+                </Text>
+              </View>
+            ) : (
+              <FlatList<LoggedMeal>
+                data={filteredMeals}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <MealListItem meal={item} onDelete={removeMeal} onPress={handleEditMeal} />
+                )}
+                scrollEnabled={false}
+                contentContainerStyle={{ paddingBottom: 120 }}
+              />
+            )}
+          </View>
+        </ScrollView>
+
+        {/* Secondary action: manual entry, no camera/AI required */}
+        <TouchableOpacity
+          onPress={() => navigation.navigate("ManualEntry", {})}
+          activeOpacity={0.85}
+          accessibilityLabel="Log meal manually"
+          style={styles.manualEntryButton}
+        >
+          <Text style={styles.manualEntryIcon}>✎</Text>
+        </TouchableOpacity>
+
+        {/* Floating action button */}
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Camera")}
+          activeOpacity={0.85}
+          accessibilityLabel="Log meal"
+          style={styles.fab}
+        >
+          <Text style={styles.fabPlus}>+</Text>
+        </TouchableOpacity>
+
+        {lastDeleted && (
+          <UndoSnackbar
+            deletedMeal={lastDeleted}
+            onUndo={undoDelete}
+            onDismiss={dismissUndo}
+          />
+        )}
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

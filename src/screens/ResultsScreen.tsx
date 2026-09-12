@@ -5,10 +5,10 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
   Alert,
   StyleSheet,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/types";
 import { useMealStore } from "@/store/mealStore";
@@ -29,6 +29,9 @@ import OilEstimationSheet from "@/components/OilEstimationSheet";
 import WeightRangeSlider, { scaledMacros } from "@/components/WeightRangeSlider";
 import CorrectionToggle from "@/components/CorrectionToggle";
 import PortionConfirmSheet from "@/components/PortionConfirmSheet";
+import HouseholdPortionSelector from "@/components/HouseholdPortionSelector";
+import { buildQuickHouseholdItems, QuickHouseholdItem } from "@/utils/quickHouseholdItems";
+import { PortionResult } from "@/utils/householdUnits";
 import {
   getLowConfidenceIndices,
   PortionPreset,
@@ -38,6 +41,7 @@ import {
   resolveMultiplier,
   applyCorrectAnalysis,
 } from "@/utils/correctionFactor";
+import { FoodItem } from "@/types";
 import { colors } from "@/theme/colors";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Results">;
@@ -86,14 +90,62 @@ export default function ResultsScreen({ navigation, route }: Props) {
   );
 
   // Per-item weight overrides driven by the range slider. Initialised to
-  // best_guess_weight_g (or estimated_weight_g as fallback for items that
-  // came through before the weight-range schema was added).
+  // the PER-UNIT baseline (baseItems, not the raw analysis.items) - this
+  // matters critically in edit mode: analysis.items[idx].best_guess_weight_g
+  // is the FULL saved weight (already multiplied by quantity, e.g. 120g for
+  // "4 rotis" saved at quantity=4), whereas baseItems[idx] has already been
+  // divided back down to the single-unit baseline (30g) via unscaleFoodItem.
+  //
+  // BUG THIS FIXES: initializing from analysis.items instead of baseItems
+  // meant scaledMacros(item, sliderWeight) computed factor = 120/30 = 4,
+  // silently re-applying the quantity multiplier a second time - and then
+  // scaleFoodItem(sliderScaled, quantities[idx]) applied it AGAIN on top of
+  // that. Net effect: quantity was squared instead of applied once, and
+  // every time the meal was reopened and saved again (even with zero
+  // changes), the stored macros multiplied by quantity all over again -
+  // a compounding bug. Two edit-save cycles on "4 rotis" (~14.5g protein
+  // correctly) would inflate to ~58g, then ~232g. This is almost certainly
+  // what produced "~100g protein in 4 rotis."
   const [sliderWeights, setSliderWeights] = useState<number[]>(() =>
-    analysis.items.map((item) => item.best_guess_weight_g ?? item.estimated_weight_g)
+    baseItems.map((item) => item.best_guess_weight_g ?? item.estimated_weight_g)
   );
 
   function setSliderWeight(idx: number, weight: number) {
     setSliderWeights((prev) => prev.map((w, i) => (i === idx ? weight : w)));
+  }
+
+  // Household unit quick-add (Katori/Roti/Spoon) directly on the main
+  // camera->results flow, not just the separate Manual Entry screen. Items
+  // added this way are appended after whatever the AI detected - e.g. "AI
+  // saw the chicken curry, I'm adding a side katori of dal it missed."
+  const quickItems = useMemo(() => buildQuickHouseholdItems(), []);
+  const [activeQuickItem, setActiveQuickItem] = useState<QuickHouseholdItem | null>(null);
+  // Items added on THIS screen via household units, before saving. In edit
+  // mode, anything added previously is already merged into analysis.items
+  // (there's no separate "extraItems" persisted on a saved meal) - so this
+  // always starts empty and only accumulates new additions made during the
+  // current visit to this screen.
+  const [extraItems, setExtraItems] = useState<FoodItem[]>([]);
+
+  function handleHouseholdConfirm(result: PortionResult) {
+    if (!activeQuickItem) return;
+    const newItem: FoodItem = {
+      food_name: `${activeQuickItem.label} (${result.description})`,
+      estimated_weight_g: result.weightG,
+      estimated_weight_min_g: result.weightG,
+      estimated_weight_max_g: result.weightG,
+      best_guess_weight_g: result.weightG,
+      weight_confidence_level: "high",
+      confidence_explanation: "User-selected household measure",
+      macros: result.macros,
+      confidence_score: 100,
+    };
+    setExtraItems((prev) => [...prev, newItem]);
+    setActiveQuickItem(null);
+  }
+
+  function removeExtraItem(idx: number) {
+    setExtraItems((prev) => prev.filter((_, i) => i !== idx));
   }
 
   // Low-confidence portion clarification. Triggers once, on a fresh
@@ -148,8 +200,10 @@ export default function ResultsScreen({ navigation, route }: Props) {
   );
 
   const adjustedTotalCalories = useMemo(
-    () => adjustedItems.reduce((sum, i) => sum + i.macros.calories, 0),
-    [adjustedItems]
+    () =>
+      adjustedItems.reduce((sum, i) => sum + i.macros.calories, 0) +
+      extraItems.reduce((sum, i) => sum + i.macros.calories, 0),
+    [adjustedItems, extraItems]
   );
 
   function setQuantity(idx: number, next: number) {
@@ -164,7 +218,7 @@ export default function ResultsScreen({ navigation, route }: Props) {
       return;
     }
     // Show oil prompt when the meal looks like it has cooking oil/sauce.
-    if (mealNeedsOilEstimation({ ...analysis, items: adjustedItems })) {
+    if (mealNeedsOilEstimation({ ...analysis, items: [...adjustedItems, ...extraItems] })) {
       setOilSheetVisible(true);
       return;
     }
@@ -184,7 +238,11 @@ export default function ResultsScreen({ navigation, route }: Props) {
   }
 
   function commitSave(oilOption: OilOption) {
-    const baseAnalysis = { ...analysis, items: adjustedItems, total_calories: adjustedTotalCalories };
+    const baseAnalysis = {
+      ...analysis,
+      items: [...adjustedItems, ...extraItems],
+      total_calories: adjustedTotalCalories,
+    };
     const afterOil = applyOilToAnalysis(baseAnalysis, oilOption);
     // Correction multiplier applied last so it stacks correctly on top of
     // both the slider-adjusted weights and the oil adjustment.
@@ -351,6 +409,54 @@ export default function ResultsScreen({ navigation, route }: Props) {
             ))
           )}
 
+          {/* Items added via household units (Katori/Roti/Spoon) on this screen */}
+          {extraItems.length > 0 &&
+            extraItems.map((item, idx) => (
+              <View key={`extra-${idx}`} style={styles.itemCard}>
+                <View style={styles.itemHeaderRow}>
+                  <Text style={styles.itemName}>{item.food_name}</Text>
+                  <TouchableOpacity onPress={() => removeExtraItem(idx)}>
+                    <Text style={styles.removeExtraText}>Remove</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.macroRow}>
+                  <MacroCell label="Cal" value={item.macros.calories} />
+                  <MacroCell label="Protein" value={item.macros.protein_g} unit="g" />
+                  <MacroCell label="Carbs" value={item.macros.carbs_g} unit="g" />
+                  <MacroCell label="Fat" value={item.macros.fat_g} unit="g" />
+                </View>
+              </View>
+            ))}
+
+          {/* Quick-add via household units - same feature as Manual Entry,
+              surfaced here too so it's reachable from the main camera flow. */}
+          {quickItems.length > 0 && (
+            <View style={{ marginBottom: 20 }}>
+              <Text style={styles.sectionTitle}>Add another item</Text>
+              <Text style={styles.quantityHint}>
+                Forgot to photograph the dal or roti on the side? Add it by
+                Katori, Roti, or Spoon.
+              </Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.quickChipRow}
+              >
+                {quickItems.map((item) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    style={styles.quickChip}
+                    onPress={() => setActiveQuickItem(item)}
+                    activeOpacity={0.75}
+                  >
+                    <Text style={styles.quickChipEmoji}>{item.emoji}</Text>
+                    <Text style={styles.quickChipLabel}>{item.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+
           <View style={{ marginTop: 8, marginBottom: 24 }}>
             <WaterIntakeCard
               weightKg={weightKg}
@@ -387,6 +493,20 @@ export default function ResultsScreen({ navigation, route }: Props) {
         }
         onPick={handlePortionPick}
       />
+
+      {activeQuickItem && (
+        <HouseholdPortionSelector
+          visible={!!activeQuickItem}
+          onDismiss={() => setActiveQuickItem(null)}
+          onConfirm={handleHouseholdConfirm}
+          foodName={activeQuickItem.label}
+          availableModes={activeQuickItem.modes}
+          foodMacrosPer100g={activeQuickItem.foodMacrosPer100g}
+          densityCategory={activeQuickItem.densityCategory}
+          flourMacrosPer100g={activeQuickItem.flourMacrosPer100g}
+          fatMacrosPer100g={activeQuickItem.fatMacrosPer100g}
+        />
+      )}
 
       <OilEstimationSheet
         visible={oilSheetVisible}
@@ -472,6 +592,20 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   confidenceText: { color: colors.slate500, fontSize: 11 },
+  removeExtraText: { color: colors.dangerMuted, fontSize: 12, fontWeight: "600" },
+  quickChipRow: { gap: 8, paddingRight: 4 },
+  quickChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.surfaceLight,
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    gap: 6,
+    marginTop: 8,
+  },
+  quickChipEmoji: { fontSize: 14 },
+  quickChipLabel: { color: colors.slate300, fontSize: 12, fontWeight: "600" },
   actionsBar: {
     flexDirection: "row",
     paddingHorizontal: 20,
